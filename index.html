@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PUBG Demo Game</title>
+<style>
+body{margin:0;background:#17251b;color:white;font-family:Arial;text-align:center}
+h2{color:#ffd34d}
+canvas{width:95vw;max-width:500px;background:#547c45;border:2px solid white;touch-action:none}
+button{padding:14px;margin:5px;font-size:17px;border-radius:10px}
+</style>
+</head>
+<body>
+<h2>BATTLE GROUND DEMO</h2>
+<p>चलो और टारगेट पर निशाना लगाओ!</p>
+<canvas id="game" width="360" height="500"></canvas>
+<div>
+<button id="left">⬅️</button>
+<button id="fire">🎯 FIRE</button>
+<button id="right">➡️</button>
+</div>
+<p id="score">Score: 0</p>
+<script>
+const c=document.getElementById('game'),x=c.getContext('2d');
+let px=180,targets=[{x:90,y:110},{x:260,y:180},{x:150,y:280}],score=0;
+function draw(){
+x.clearRect(0,0,360,500);
+x.fillStyle='#416c38';x.fillRect(0,0,360,500);
+x.strokeStyle='#92a76a';x.lineWidth=2;
+for(let i=0;i<8;i++){x.beginPath();x.moveTo(i*55,0);x.lineTo(i*55,500);x.stroke()}
+targets.forEach(t=>{x.fillStyle='#cf3c32';x.beginPath();x.arc(t.x,t.y,15,0,7);x.fill();x.fillStyle='white';x.fillRect(t.x-3,t.y-10,6,20)});
+x.fillStyle='#38d8ff';x.fillRect(px-10,420,20,30);
+x.fillStyle='white';x.fillText('PLAYER',px-22,465);
+}
+document.getElementById('left').onclick=()=>{px=Math.max(15,px-20);draw()};
+document.getElementById('right').onclick=()=>{px=Math.min(345,px+20);draw()};
+document.getElementById('fire').onclick=()=>{
+if(!targets.length){targets=[{x:90,y:110},{x:260,y:180},{x:150,y:280}]}
+let i=targets.findIndex(t=>Math.abs(t.x-px)<45);
+if(i>=0){targets.splice(i,1);score++;document.getElementById('score').textContent='Score: '+score}
+else alert('टारगेट के पास जाकर निशाना लगाओ!');
+draw();
+};
+draw();
+</script>
+</body>
+</html>
