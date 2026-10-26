@@ -1,0 +1,58 @@
+
+name: Build PUBG Demo APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create Android project
+        run: |
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/demo/game
+          cp index.html app/src/main/assets/index.html
+          echo "include ':app'" > settings.gradle
+          echo "plugins { id 'com.android.application' version '8.6.1' }; android { namespace 'com.demo.game'; compileSdk 35; defaultConfig { applicationId 'com.demo.game'; minSdk 23; targetSdk 28 } }" > app/build.gradle
+          echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="PUBG Demo"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
+          cat > app/src/main/java/com/demo/game/MainActivity.java <<'EOF'
+          package com.demo.game;
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebSettings;
+          public class MainActivity extends Activity {
+            public void onCreate(Bundle b) {
+              super.onCreate(b);
+              WebView w = new WebView(this);
+              w.getSettings().setJavaScriptEnabled(true);
+              w.getSettings().setDomStorageEnabled(true);
+              setContentView(w);
+              w.loadUrl("file:///android_asset/index.html");
+            }
+          }
+          EOF
+
+      - name: Build APK
+        run: |
+          chmod +x ./gradlew 2>/dev/null || true
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PUBG-Demo-APK
+          path: app/build/outputs/apk/debug/*.apk
