@@ -18,9 +18,11 @@ jobs:
           java-version: '17'
 
       - name: Setup Android SDK
+        uses:      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-                with:
+        with:
           packages: 'platform-tools'
+          
       - name: Create Android project
         run: |
           mkdir -p app/src/main/assets
